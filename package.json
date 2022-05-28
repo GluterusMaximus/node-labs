@@ -1,0 +1,19 @@
+{
+  "name": "simple-shop",
+  "version": "1.0.0",
+  "description": "A simple online shop for various products",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GluterusMaximus/node-labs.git"
+  },
+  "author": "Grigoriy Ustymenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GluterusMaximus/node-labs/issues"
+  },
+  "homepage": "https://github.com/GluterusMaximus/node-labs#readme"
+}
