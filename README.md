@@ -1,8 +1,8 @@
 # Simple online shop
 ## About
 This is a simple online shop with no limits regarding the type of products it sells.
-Has some basic functionality, such as viewing products, adding them to the cart, leaving product reviews.
-User functionality: logging in, signing out, registering an account;
+Has some basic functionality, such as viewing products, adding them to the cart, leaving product reviews.  
+User functionality: logging in, signing out, registering an account;  
 Admin functionality: editing users, products, making other users admins.
 
 ## Technology stack
