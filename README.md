@@ -24,3 +24,8 @@ Admin functionality: editing users, products, making other users admins.
 
   MongoDB is a document-oriented database program, which makes it much easier to work with. It also is  
   has a large community of users that can provide help. Mongoose is an ODM for MongoDB.
+  
+  ## Database diagram
+  
+  ![Untitled Diagram drawio](https://user-images.githubusercontent.com/80482122/172586347-1504e356-f883-4006-bfa9-d038141011b8.png)
+
