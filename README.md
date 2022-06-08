@@ -27,5 +27,5 @@ Admin functionality: editing users, products, making other users admins.
   
   ## Database diagram
   
-  ![Untitled Diagram drawio](https://user-images.githubusercontent.com/80482122/172586347-1504e356-f883-4006-bfa9-d038141011b8.png)
+  ![Untitled Diagram drawio (1)](https://user-images.githubusercontent.com/80482122/172588741-79e4dbfc-3ece-4ea3-87f8-92b932c77282.png)
 
