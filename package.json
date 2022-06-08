@@ -1,11 +1,11 @@
 {
-  "name": "simple-shop",
+  "name": "node-labs",
   "version": "1.0.0",
   "description": "A simple online shop for various products",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server",
+    "start": "node src/server",
     "lint": "eslint --ignore-path .gitignore .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
     "prepare": "husky install"
@@ -27,5 +27,10 @@
     "eslint-plugin-sonarjs": "^0.13.0",
     "husky": "^8.0.1",
     "prettier": "^2.6.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mongoose": "^6.3.5"
   }
 }
