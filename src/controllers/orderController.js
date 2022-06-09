@@ -1,25 +1,45 @@
 import Order from '../models/orderModel.js';
 import asyncHandler from 'express-async-handler';
 import { ORDER_NOT_FOUND_MESSAGE } from '../constants/errorConstants.js';
+import convertCurrency from '../utils/convertCurrency.js';
 
 // @desc     Create a new order
 // @route    POST /api/orders
 // @access   Private
 const placeOrder = asyncHandler(async (req, res) => {
-  const { orderItems, shippingAddress, shippingPrice, taxPrice, totalPrice } =
-    req.body;
+  const {
+    orderItems,
+    shippingAddress,
+    shippingPrice,
+    taxPrice,
+    totalPrice,
+    currency,
+  } = req.body;
 
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
   } else {
+    let convertedShipping, convertedTax, convertedTotal;
+    try {
+      [convertedShipping, convertedTax, convertedTotal] = await convertCurrency(
+        currency,
+        [shippingPrice, taxPrice, totalPrice]
+      );
+    } catch (axiosErr) {
+      res.status(axiosErr.response?.status || 500);
+      throw new Error(
+        `Cannot convert currency: ${axiosErr.response?.data?.error?.message}`
+      );
+    }
+
     const order = new Order({
       orderItems,
       user: req.user._id,
       shippingAddress,
-      shippingPrice,
-      taxPrice,
-      totalPrice,
+      shippingPrice: convertedShipping,
+      taxPrice: convertedTax,
+      totalPrice: convertedTotal,
     });
 
     const createdOrder = await order.save();
