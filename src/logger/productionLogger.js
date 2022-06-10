@@ -8,9 +8,10 @@ const devLogger = () =>
     transports: [
       new transports.File({
         filename: 'error.log',
+        dirname: 'logs',
         level: 'error',
       }),
-      new transports.File({ filename: 'combined.log' }),
+      new transports.File({ filename: 'combined.log', dirname: 'logs' }),
     ],
   });
 
