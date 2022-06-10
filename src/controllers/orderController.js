@@ -33,7 +33,7 @@ const placeOrder = asyncHandler(async (req, res) => {
       );
     }
 
-    const order = new Order({
+    const createdOrder = await Order.create({
       orderItems,
       user: req.user._id,
       shippingAddress,
@@ -42,7 +42,6 @@ const placeOrder = asyncHandler(async (req, res) => {
       totalPrice: convertedTotal,
     });
 
-    const createdOrder = await order.save();
     res.status(201).json({
       _id: createdOrder._id,
       orderItems: createdOrder.orderItems,
