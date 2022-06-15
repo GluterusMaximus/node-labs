@@ -2,6 +2,8 @@ import User from '../models/userModel.js';
 import generateToken from '../utils/generateToken.js';
 import asyncHandler from 'express-async-handler';
 import { USER_NOT_FOUND_MESSAGE } from '../constants/errorConstants.js';
+import UserDto from '../dtos/userDto.js';
+import { validationResult } from 'express-validator';
 
 // @desc     Auth user & get token
 // @route    POST /api/users/login
@@ -11,13 +13,8 @@ const authUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email });
 
   if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
-    });
+    const userDto = new UserDto(user);
+    res.json({ ...userDto, token: generateToken(user._id) });
   } else {
     res.status(401);
     throw new Error('Invalid email or password');
@@ -28,6 +25,12 @@ const authUser = asyncHandler(async (req, res) => {
 // @route    POST /api/users
 // @access   Public
 const registerUser = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid registration data', errors: errors.array() };
+  }
+
   const { email, name, password } = req.body;
   const userExists = await User.findOne({ email });
 
@@ -38,13 +41,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({ name, email, password });
   if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
-    });
+    const userDto = new UserDto(user);
+    res.json({ ...userDto, token: generateToken(user._id) });
   } else {
     res.status(400);
     throw new Error('Invalid user data');
@@ -57,12 +55,8 @@ const registerUser = asyncHandler(async (req, res) => {
 const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
   if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
+    const userDto = new UserDto(user);
+    res.json(userDto);
   } else {
     res.status(404);
     throw new Error(USER_NOT_FOUND_MESSAGE);
@@ -73,6 +67,12 @@ const getUserProfile = asyncHandler(async (req, res) => {
 // @route    PUT /api/users/profile
 // @access   Private
 const updateUserProfile = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid update data', errors: errors.array() };
+  }
+
   const user = await User.findById(req.user._id);
 
   if (user) {
@@ -82,13 +82,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
     const updatedUser = await user.save();
 
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-      token: generateToken(updatedUser._id),
-    });
+    const userDto = new UserDto(updatedUser);
+    res.json({ ...userDto, token: generateToken(updatedUser._id) });
   } else {
     res.status(404);
     throw new Error(USER_NOT_FOUND_MESSAGE);
@@ -99,8 +94,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 // @route    GET /api/users
 // @access   Private/Admin
 const getUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({}).select('-__v');
-  res.json(users);
+  const users = await User.find({});
+  const userDtos = users.map(user => new UserDto(user));
+  res.json(userDtos);
 });
 
 // @desc     Delete a user
@@ -121,10 +117,11 @@ const deleteUser = asyncHandler(async (req, res) => {
 // @route    GET /api/users/:id
 // @access   Private/Admin
 const getUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).select('-password -__v');
+  const user = await User.findById(req.params.id);
 
   if (user) {
-    res.json(user);
+    const userDto = new UserDto(user);
+    res.json(userDto);
   } else {
     res.status(404);
     throw new Error(USER_NOT_FOUND_MESSAGE);
@@ -135,6 +132,12 @@ const getUserById = asyncHandler(async (req, res) => {
 // @route    PUT /api/users/:id
 // @access   Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid update data', errors: errors.array() };
+  }
+
   const user = await User.findById(req.params.id);
 
   if (user) {
@@ -145,12 +148,8 @@ const updateUser = asyncHandler(async (req, res) => {
 
     const updatedUser = await user.save();
 
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-    });
+    const userDto = new UserDto(updatedUser);
+    res.json(userDto);
   } else {
     res.status(404);
     throw new Error(USER_NOT_FOUND_MESSAGE);

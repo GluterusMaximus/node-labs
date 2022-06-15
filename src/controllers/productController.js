@@ -1,24 +1,25 @@
 import Product from '../models/productModel.js';
 import asyncHandler from 'express-async-handler';
+import ProductDto from '../dtos/productDto.js';
+import { validationResult } from 'express-validator';
 
 // @desc     Fetch all products
 // @route    GET /api/products
 // @access   Public
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({}, '-__v -updatedAt -createdAt');
-  res.json(products);
+  const products = await Product.find({});
+  const productDtos = products.map(product => new ProductDto(product));
+  res.json(productDtos);
 });
 
 // @desc     Fetch single product
 // @route    GET /api/products/:id
 // @access   Public
 const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id)
-    .populate('user', 'id name')
-    .select('-__v');
+  const product = await Product.findById(req.params.id);
 
   if (product) {
-    res.json(product);
+    res.json(new ProductDto(product));
   } else {
     res.status(404);
     throw new Error('Product not found!');
@@ -44,6 +45,12 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // @route    POST /api/products
 // @access   Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid product data', errors: errors.array() };
+  }
+
   const { name, price, description, brand, category, countInStock } = req.body;
   const createdProduct = await Product.create({
     name,
@@ -55,21 +62,19 @@ const createProduct = asyncHandler(async (req, res) => {
     countInStock,
   });
 
-  res.status(201).json({
-    _id: createdProduct._id,
-    name: createdProduct.name,
-    price: createdProduct.price,
-    description: createdProduct.description,
-    brand: createdProduct.brand,
-    category: createdProduct.category,
-    countInStock: createdProduct.countInStock,
-  });
+  res.status(201).json(new ProductDto(createdProduct));
 });
 
 // @desc     Update a product
 // @route    PUT /api/products/:id
 // @access   Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid product data', errors: errors.array() };
+  }
+
   const { name, price, description, brand, category, countInStock } = req.body;
   const product = await Product.findById(req.params.id);
 
@@ -82,15 +87,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.countInStock = countInStock;
 
     const updatedProduct = await product.save();
-    res.status(201).json({
-      _id: updatedProduct._id,
-      name: updatedProduct.name,
-      price: updatedProduct.price,
-      description: updatedProduct.description,
-      brand: updatedProduct.brand,
-      category: updatedProduct.category,
-      countInStock: updatedProduct.countInStock,
-    });
+    res.status(201).json(new ProductDto(updatedProduct));
   } else {
     res.status(404);
     throw new Error('Product not found');
@@ -101,6 +98,12 @@ const updateProduct = asyncHandler(async (req, res) => {
 // @route    POST /api/products/:id/reviews
 // @access   Private
 const createProductReview = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid review data', errors: errors.array() };
+  }
+
   const { rating, comment } = req.body;
   const product = await Product.findById(req.params.id);
 

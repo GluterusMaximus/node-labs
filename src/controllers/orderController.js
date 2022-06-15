@@ -2,11 +2,19 @@ import Order from '../models/orderModel.js';
 import asyncHandler from 'express-async-handler';
 import { ORDER_NOT_FOUND_MESSAGE } from '../constants/errorConstants.js';
 import convertCurrency from '../utils/convertCurrency.js';
+import OrderDto from '../dtos/orderDto.js';
+import { validationResult } from 'express-validator';
 
 // @desc     Create a new order
 // @route    POST /api/orders
 // @access   Private
 const placeOrder = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid order data', errors: errors.array() };
+  }
+
   const {
     orderItems,
     shippingAddress,
@@ -42,14 +50,7 @@ const placeOrder = asyncHandler(async (req, res) => {
       totalPrice: convertedTotal,
     });
 
-    res.status(201).json({
-      _id: createdOrder._id,
-      orderItems: createdOrder.orderItems,
-      shippingAddress: createdOrder.shippingAddress,
-      shippingPrice: createdOrder.shippingPrice,
-      taxPrice: createdOrder.taxPrice,
-      totalPrice: createdOrder.totalPrice,
-    });
+    res.status(201).json(new OrderDto(createdOrder));
   }
 });
 
@@ -57,12 +58,10 @@ const placeOrder = asyncHandler(async (req, res) => {
 // @route    GET /api/orders/:id
 // @access   Private/Admin
 const getOrderById = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id)
-    .populate('user', 'name email')
-    .select('-__v');
+  const order = await Order.findById(req.params.id);
 
   if (order) {
-    res.json(order);
+    res.json(new OrderDto(order));
   } else {
     res.status(404);
     throw new Error(ORDER_NOT_FOUND_MESSAGE);
@@ -73,26 +72,30 @@ const getOrderById = asyncHandler(async (req, res) => {
 // @route    GET /api/orders/myorders
 // @access   Private
 const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).select('-__v');
-
-  res.json(orders);
+  const orders = await Order.find({ user: req.user._id });
+  const orderDtos = orders.map(order => new OrderDto(order));
+  res.json(orderDtos);
 });
 
 // @desc     Get all orders
 // @route    GET /api/orders
 // @access   Private/Admin
 const getOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({})
-    .populate('user', 'id name')
-    .select('-__v');
-
-  res.json(orders);
+  const orders = await Order.find({});
+  const orderDtos = orders.map(order => new OrderDto(order));
+  res.json(orderDtos);
 });
 
 // @desc     Update order by id
 // @route    PUT /api/orders/:id
 // @access   Private/Admin
 const updateOrder = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400);
+    throw { message: 'Invalid order data', errors: errors.array() };
+  }
+
   const {
     shippingAddress,
     user,
@@ -112,14 +115,7 @@ const updateOrder = asyncHandler(async (req, res) => {
     order.totalPrice = totalPrice;
 
     const updatedOrder = await order.save();
-    res.status(201).json({
-      _id: updatedOrder._id,
-      orderItems: updatedOrder.orderItems,
-      shippingAddress: updatedOrder.shippingAddress,
-      shippingPrice: updatedOrder.shippingPrice,
-      taxPrice: updatedOrder.taxPrice,
-      totalPrice: updatedOrder.totalPrice,
-    });
+    res.status(201).json(new OrderDto(updatedOrder));
   } else {
     res.status(404);
     throw new Error('Order not found');

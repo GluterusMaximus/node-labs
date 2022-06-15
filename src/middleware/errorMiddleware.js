@@ -13,7 +13,9 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode);
   logger.error({ status: res.statusCode, message: err.message });
   res.json({
-    errors: [{ status: res.statusCode.toString(), detail: err.message }],
+    message: err.message,
+    status: res.statusCode.toString(),
+    errors: err.errors ?? [],
   });
 };
 
