@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server",
+    "dev": "nodemon src/server",
     "lint": "eslint --ignore-path .gitignore .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
     "data:import": "node src/seeder",
@@ -28,6 +29,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-sonarjs": "^0.13.0",
     "husky": "^8.0.1",
+    "nodemon": "^2.0.16",
     "prettier": "^2.6.2"
   },
   "dependencies": {

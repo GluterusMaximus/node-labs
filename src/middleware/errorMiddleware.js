@@ -15,7 +15,7 @@ const errorHandler = (err, req, res, next) => {
   res.json({
     message: err.message,
     status: res.statusCode.toString(),
-    errors: err.errors ?? [],
+    errors: Array.isArray(err.errors) ? err.errors : [],
   });
 };
 

@@ -19,7 +19,7 @@ router
   .post(
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 3, max: 32 }),
-    body('name').trim(),
+    body('name').notEmpty().trim(),
     registerUser
   )
   .get(protect, admin, getUsers);
