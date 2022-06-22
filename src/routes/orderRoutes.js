@@ -20,7 +20,7 @@ router.route('/myorders').get(protect, getMyOrders);
 router
   .route('/:id')
   .get(protect, admin, getOrderById)
-  .put(protect, body('orderItems').isArray({ min: 1 }), admin, updateOrder)
+  .put(protect, admin, body('orderItems').isArray({ min: 1 }), updateOrder)
   .delete(protect, admin, deleteOrder);
 
 export default router;

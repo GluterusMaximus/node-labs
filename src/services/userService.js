@@ -40,7 +40,7 @@ class UserService {
     };
   }
 
-  async updateUser(id, updatedData) {
+  async update(id, updatedData) {
     const user = await User.findById(id);
     if (!user) throw new Error(USER_NOT_FOUND_MESSAGE);
 
